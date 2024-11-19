@@ -1,0 +1,178 @@
+﻿@page "/Stepper"
+
+@using System.Text.Json
+@inject IDeviceServices _deviceServices
+@inject DeviceDataService _deviceDataService
+@inject IUserInterfaceToolsServices _userInterfaceToolsServices
+
+<MudCard>
+    <MudCardHeader>
+        <MudText Typo="Typo.h6">@_deviceServices.DeviceName Control</MudText>
+    </MudCardHeader>
+
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" md="2" Class="d-flex justify-center">
+                <MudTooltip Arrow Text="Get config data">
+                    <MudFab Color="Color.Primary"
+                            StartIcon="@Icons.Material.Filled.FileDownload"
+                            OnClick="_deviceServices.GetConfigData" />
+                </MudTooltip>
+            </MudItem>
+            <MudItem xs="12" md="3" Class="d-flex justify-center">
+                <SetReadAndNotifyComponent DeviceServices="@_deviceServices" />
+            </MudItem>
+            <MudItem xs="12" md="3" Class="d-flex justify-center">
+                <SetNotifyIntervalComponent DeviceServices="@_deviceServices" />
+            </MudItem>
+            <MudItem xs="12" md="3" Class="d-flex justify-center">
+                <SetGPIOControlComponent DeviceServices="@((DeviceServices)_deviceServices)" />
+            </MudItem>
+            <MudItem xs="12" md="2" Class="d-flex justify-center">
+                <MudTooltip Arrow Text="Stop Motor">
+                    <MudFab Color="Color.Error"
+                            StartIcon="@Icons.Material.Filled.StopCircle"
+                            OnClick="OnStop" />
+                </MudTooltip>
+            </MudItem>
+            <MudItem xs="12" md="5" Class="d-flex justify-center">
+                <MudTextField @bind-Value="currentValue"
+                              Label="Steps"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.End"
+                              AdornmentColor="Color.Warning"
+                              AdornmentIcon="@Icons.Material.Filled.Send"
+                              OnAdornmentClick="OnSendValue" />
+            </MudItem>
+            <MudItem xs="12" md="5" Class="d-flex justify-center">
+                <MudField Label="Current Position" Variant="Variant.Outlined">
+                   @deviceValue
+               </MudField>
+            </MudItem>
+            <MudItem xs="12">
+                <DeviceDonutChartComponent CurrentValue="@deviceValue" MaxValue="@(currentValue)" Label="@($"{_deviceServices.DeviceName} Value")" />
+            </MudItem>
+            <MudItem xs="12">
+                <DeviceLineChartComponent Values="@dataPoins" />
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    #region Model
+
+    #endregion
+
+    #region Variables
+
+    int currentValue;
+    int deviceValue;
+    List<DataPoint> dataPoins = new();
+
+    #endregion
+
+    #region Functions
+
+    /// <summary>
+    /// Used to initialize a component for the entire lifetime of the component instance
+    /// </summary>
+    protected override void OnInitialized()
+    {
+        _deviceServices.SetDeviceModel("Stepper Motor", SystemConstants.DeviceKey.Stepper);
+        _deviceServices.OnStateChanged += StateHasChanged;
+        _deviceServices.OnDataReceived += HandleInputData;
+    }
+
+    /// <summary>
+    /// Invoked after a component has rendered interactively and the UI has finished updating
+    /// </summary>
+    /// <param name="firstRender"></param>
+    /// <returns></returns>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            //Call values from device
+            await _deviceServices.GetConfigData();
+
+            //Load previous data for the device
+            dataPoins = _deviceDataService.Get(_deviceServices.DeviceKey);
+
+            //Update View
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Handle message in, apply specific functions for device
+    /// </summary>
+    /// <param name="msg"></param>
+    void HandleInputData(DeviceMessage msg)
+    {
+        try
+        {
+            switch (msg.Type)
+            {
+                case SystemConstants.MessageType.SetValue:
+                    setValue(msg);
+                    break;
+                default:
+                    _userInterfaceToolsServices.ShowSnackbarMessage(_deviceServices.DeviceName, $"{MessageConstants.MessageTypeUndefined}: {msg.Type}", Severity.Info);
+                    break;
+            }
+
+        }
+        catch (ArgumentException ex)
+        {
+            _userInterfaceToolsServices.ShowSnackbarMessage(_deviceServices.DeviceName, $"{MessageConstants.ErrorMessage} - {ex.Message}", Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            _userInterfaceToolsServices.ShowSnackbarMessage(_deviceServices.DeviceName, $"{MessageConstants.ErrorMessage}", Severity.Error);
+        }
+
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Send a value to the device
+    /// </summary>
+    /// <returns></returns>
+    async Task OnSendValue()
+    {
+        await _deviceServices.SendDeviceMessageAsync(SystemConstants.MessageType.SetValue,currentValue);
+    }
+
+  
+    async Task OnStop()
+    {
+        await _deviceServices.SendDeviceMessageAsync(SystemConstants.MessageType.SetOnCancel);
+    }
+
+
+    /// <summary>
+    /// Set the local Value received from device
+    /// </summary>
+    /// <param name="msg"></param>
+    void setValue(DeviceMessage msg)
+    {
+        var value = int.Parse(msg.Value?.ToString());
+
+        deviceValue = value;
+        dataPoins = _deviceDataService.Add(_deviceServices.DeviceKey, value);
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Resource release
+    /// </summary>
+    public void Dispose()
+    {
+        _deviceServices.OnStateChanged -= StateHasChanged;
+        _deviceServices.OnDataReceived -= HandleInputData;
+    }
+
+    #endregion
+}

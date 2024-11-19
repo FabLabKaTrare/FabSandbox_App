@@ -1,0 +1,52 @@
+﻿
+
+<MudCardContent>
+    <MudPaper>
+        @foreach (var log in LogList)
+        {
+            <MudText>
+                <MudIcon Color="@(log.Device == Data.DeviceKey?Color.Success:Color.Primary)" Icon="@Icons.Material.Filled.Bookmark"></MudIcon>
+                 @log.Device <MudSpacer/> @log.Type <MudSpacer/> @log.Value.ToString()
+            </MudText>
+        }
+    </MudPaper>
+
+</MudCardContent>
+
+
+
+@code {
+
+    [Parameter]
+    public MessageLog Data { get; set; }
+
+    List<DeviceMessage> LogList = new();
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(Data != null)
+        AddLog(Data);
+    }
+
+    void AddLog(MessageLog data)
+    {
+        try
+        {
+            if (LogList.Count > 20)
+            {
+                LogList.RemoveAt(0);
+            }
+
+            LogList.Add(data.Message);
+
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+
+
+}

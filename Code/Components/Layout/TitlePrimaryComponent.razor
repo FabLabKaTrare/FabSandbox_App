@@ -1,0 +1,36 @@
+﻿<MudSpacer />
+<MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+    <MudText Typo="@Size" Style="@($"color:{Color}")" Align="@Alignment" Class="@Class">@ChildContent</MudText>
+
+</MudHidden>
+<MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
+    <MudText Typo="@SizeSm" Style="@($"color:{Color}")" Align="@Alignment" Class="@Class">@ChildContent</MudText>
+</MudHidden>
+@if (ShowHR)
+{
+    <MudDivider Style="margin-bottom: 2px;" />
+}
+
+@code {
+    [Parameter]
+    public string Class { get; set; } = null;
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public MudBlazor.Typo Size { get; set; } = Typo.h4;
+
+    [Parameter]
+    public MudBlazor.Typo SizeSm { get; set; } = Typo.subtitle1;
+
+    [Parameter]
+    public MudBlazor.Align Alignment { get; set; } = Align.Center;
+
+    [Parameter]
+    public string Color { get; set; } = "goldenrod";
+
+    [Parameter]
+    public bool ShowHR { get; set; } = true;
+
+}

@@ -1,0 +1,167 @@
+﻿@page "/DHT"
+
+@using System.Text.Json
+@inject IDeviceServices _deviceServices
+@inject DeviceDataService _deviceDataService
+@inject IUserInterfaceToolsServices _userInterfaceToolsServices
+
+<MudCard>
+    <MudCardHeader>
+        <MudText Typo="Typo.h6">@_deviceServices.DeviceName Control</MudText>
+    </MudCardHeader>
+
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" md="2" Class="d-flex justify-center">
+                <MudTooltip Arrow Text="Get config data">
+                    <MudFab Color="Color.Primary"
+                            StartIcon="@Icons.Material.Filled.FileDownload"
+                            OnClick="_deviceServices.GetConfigData" />
+                </MudTooltip>
+            </MudItem>
+            <MudItem xs="12" md="3" Class="d-flex justify-center">
+                <SetReadAndNotifyComponent DeviceServices="@_deviceServices" />
+            </MudItem>
+            <MudItem xs="12" md="3" Class="d-flex justify-center">
+                <SetNotifyIntervalComponent DeviceServices="@_deviceServices" />
+            </MudItem>
+            <MudItem xs="12" md="3" Class="d-flex justify-center">
+                <SetGPIOControlComponent DeviceServices="@((DeviceServices)_deviceServices)" />
+            </MudItem>
+            <MudItem xs="6">
+                <DeviceDonutChartComponent CurrentValue="@humidity" MaxValue="100" Label="@($"Humidity %")" />
+            </MudItem>
+            <MudItem xs="6">
+                <DeviceDonutChartComponent CurrentValue="@temperature" MaxValue="100" Label="@($"Temperature °C")" />
+            </MudItem>
+            <MudItem xs="6">
+                <DeviceLineChartComponent Values="@dataPoinsHumidity" />
+            </MudItem>
+            <MudItem xs="6">
+                <DeviceLineChartComponent Values="@dataPoinsTemperature" />
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    #region Model
+
+    #endregion
+
+    #region Variables
+
+    float temperature;
+    float humidity;
+    List<DataPoint> dataPoinsTemperature = new();
+    List<DataPoint> dataPoinsHumidity = new();
+
+    #endregion
+
+    #region Functions
+
+    /// <summary>
+    /// Used to initialize a component for the entire lifetime of the component instance
+    /// </summary>
+    protected override void OnInitialized()
+    {
+        _deviceServices.SetDeviceModel("Temperature & Relative Humidity", SystemConstants.DeviceKey.DHT);
+        _deviceServices.OnStateChanged += StateHasChanged;
+        _deviceServices.OnDataReceived += HandleInputData;
+    }
+
+    /// <summary>
+    /// Invoked after a component has rendered interactively and the UI has finished updating
+    /// </summary>
+    /// <param name="firstRender"></param>
+    /// <returns></returns>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            //Call values from device
+            await _deviceServices.GetConfigData();
+
+            //Load previous data for the device
+            dataPoinsTemperature = _deviceDataService.Get($"{_deviceServices.DeviceKey}-Temp");
+            dataPoinsHumidity = _deviceDataService.Get($"{_deviceServices.DeviceKey}-Humi");
+
+            //Update View
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Handle message in, apply specific functions for device
+    /// </summary>
+    /// <param name="msg"></param>
+    void HandleInputData(DeviceMessage msg)
+    {
+        try
+        {
+            switch (msg.Type)
+            {
+                case SystemConstants.MessageType.SetValue:
+                    setValue(msg);
+                    break;
+                default:
+                    _userInterfaceToolsServices.ShowSnackbarMessage(_deviceServices.DeviceName, $"{MessageConstants.MessageTypeUndefined}: {msg.Type}", Severity.Info);
+                    break;
+            }
+
+        }
+        catch (ArgumentException ex)
+        {
+            _userInterfaceToolsServices.ShowSnackbarMessage(_deviceServices.DeviceName, $"{MessageConstants.ErrorMessage} - {ex.Message}", Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            _userInterfaceToolsServices.ShowSnackbarMessage(_deviceServices.DeviceName, $"{MessageConstants.ErrorMessage}", Severity.Error);
+        }
+
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Send a value to the device
+    /// </summary>
+    /// <returns></returns>
+    async Task OnSendValue()
+    {
+
+    }
+
+    /// <summary>
+    /// Set the local Value received from device
+    /// </summary>
+    /// <param name="msg"></param>
+    void setValue(DeviceMessage msg)
+    {
+        var data = JsonSerializer.Deserialize<DHT_Data>(msg.Value.ToString());
+
+        humidity = data.Humidity;
+        temperature = data.Temperature;
+        dataPoinsTemperature = _deviceDataService.Add($"{_deviceServices.DeviceKey}-Temp",temperature);
+        dataPoinsHumidity = _deviceDataService.Add($"{_deviceServices.DeviceKey}-Humi",humidity);
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Resource release
+    /// </summary>
+    public void Dispose()
+    {
+        _deviceServices.OnStateChanged -= StateHasChanged;
+        _deviceServices.OnDataReceived -= HandleInputData;
+    }
+
+    class DHT_Data
+    {
+        public float Humidity { get; set; } = 0;
+
+        public float Temperature { get; set; } = 0;
+    }
+
+    #endregion
+}

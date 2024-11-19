@@ -1,0 +1,36 @@
+﻿
+<MudDialog>
+    <TitleContent>
+        <TitleSecondaryComponent Color="goldenrod">
+            @MudDialog.Title
+        </TitleSecondaryComponent>
+    </TitleContent>
+    <DialogContent>
+        <MudNumericField Label="@($"{Label} ({Units})")"
+                         @bind-Value="Value"
+                         Style="@($"color:#ffc107")"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Normal"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cerrar</MudButton>
+
+        <MudButton Color="Color.Warning" OnClick="Submit">Establecer valor</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string Units { get; set; }
+
+    [Parameter]
+    public string Label { get; set; }
+
+    [Parameter]
+    public int Value { get; set; }
+
+    async Task Submit() => MudDialog.Close(DialogResult.Ok(Value));
+
+    void Cancel() => MudDialog.Cancel();
+}

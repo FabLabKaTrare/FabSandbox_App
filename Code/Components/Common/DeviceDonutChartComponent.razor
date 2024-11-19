@@ -1,0 +1,17 @@
+﻿<MudChart ChartType="ChartType.Donut" Width="200px" Height="200px" InputData="@(new double[]{MaxValue - CurrentValue,CurrentValue})" InputLabels="@(new string[]{"Curent Value",$"Max: {MaxValue}"})">
+    <CustomGraphics>
+        <text class="donut-inner-text" x="47%" y="35%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="2">@Label</text>
+        <text class="donut-inner-text" x="47%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="5">@CurrentValue</text>
+    </CustomGraphics>
+</MudChart>
+
+@code {
+    [Parameter]
+    public double CurrentValue { get; set; }
+
+    [Parameter]
+    public double MaxValue { get; set; } = 4095;
+
+    [Parameter]
+    public string Label { get; set; } = "Current Value";
+}

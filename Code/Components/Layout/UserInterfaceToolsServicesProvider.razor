@@ -1,0 +1,28 @@
+﻿@inject ISnackbar _snackbar
+@inject IUserInterfaceToolsServices userInterfaceToolsServices
+@inject IJSRuntime JSRuntime
+
+<CoreDialogMessageComponent @ref="@userInterfaceToolsServices.CoreDialogMessageComponent" />
+
+<CoreSnackbarMessageComponent @ref="userInterfaceToolsServices.SnackbarMessagesComponent" />
+
+<CoreIndicatorProcessingComponent @ref="userInterfaceToolsServices.CoreIndicatorProcessingComponent" />
+
+<CoreIndicatorProgressBarComponent @ref="userInterfaceToolsServices.CoreIndicatorProgressBarComponent" />
+
+@code {
+
+    protected override void OnParametersSet()
+    {
+        userInterfaceToolsServices.UserInterfaceToolsServicesProvider = this;
+
+        base.OnParametersSet();
+    }
+
+    protected override void OnInitialized()
+    {
+
+    }
+
+    public async Task NavigateBack() => await JSRuntime.InvokeVoidAsync("history.back");
+}

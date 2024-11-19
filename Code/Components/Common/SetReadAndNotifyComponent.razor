@@ -1,0 +1,33 @@
+﻿
+<MudSwitch T="bool" 
+    ValueChanged="@OnValueChange" 
+    Value="switchValue" 
+    Label="@(switchValue?"Notificaciones habilitadas":"Notificaciones deshabilitadas")" 
+    Color="Color.Success" />
+
+@code {
+    #region Parameters
+    [Parameter]
+    public IDeviceServices DeviceServices { get; set; }
+    #endregion
+
+    #region Variables
+    public bool switchValue { get; set; } = true;
+    #endregion
+
+    #region Function
+
+    async Task OnValueChange(bool state)
+    {
+        switchValue = state;
+
+        await OnSetValue();
+    }
+
+    async Task OnSetValue()
+    {
+
+        await DeviceServices.SendDeviceMessageAsync(SystemConstants.MessageType.SetReadAndNotify, switchValue == true ? 1 : 0);
+    }
+    #endregion
+}
