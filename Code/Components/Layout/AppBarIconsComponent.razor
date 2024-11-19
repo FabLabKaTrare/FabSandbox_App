@@ -1,0 +1,21 @@
+﻿@inject IWebSocketService WebSocketService 
+
+<MudIcon Icon="@(WebSocketService.IsConnected ? Icons.Material.Filled.Wifi : Icons.Material.Filled.SignalWifiOff)"
+                 Color="@GetConnectionStatusColor()" />
+
+@code {
+     protected override void OnInitialized()
+    {
+        WebSocketService.OnConnectionStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        WebSocketService.OnConnectionStateChanged -= StateHasChanged;
+    }
+
+    private Color GetConnectionStatusColor()
+    {
+        return WebSocketService.IsConnected ? Color.Success : Color.Error;
+    }
+}

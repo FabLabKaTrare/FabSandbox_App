@@ -1,0 +1,42 @@
+﻿@if (IsVisible)
+{
+    <MudGrid>
+
+        @if (ShowText)
+        {
+            @if (string.IsNullOrEmpty(Title) == false)
+            {
+                <MudItem md="12" xs="12">
+                    <MudText Typo="Typo.h4" Style="color:var(--amarilloICE)">
+                        @Title
+                    </MudText>
+                </MudItem>
+            }
+
+            <MudItem md="12" xs="12">
+                <MudText Typo="Typo.h5" Style="color:var(--amarilloICE)">
+                    Cargando datos, por favor espere...
+                </MudText>
+            </MudItem>
+        }
+
+        <MudItem md="12" xs="12">
+            <MudProgressLinear Color="Color.Success" Indeterminate="true" Class="my-7" />
+        </MudItem>
+
+    </MudGrid>
+}
+
+@code {
+
+
+    [Parameter]
+    public bool IsVisible { get; set; } = false;
+
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public bool ShowText { get; set; }
+
+}

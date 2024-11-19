@@ -1,0 +1,69 @@
+﻿
+<MudOverlay DarkBackground="true" Visible="@isVisible" ZIndex="9999">
+           <MudGrid>
+            <MudItem md="12" xs="12">
+                <MudAlert ContentAlignment="HorizontalAlignment.Center" NoIcon="true" Severity="Severity.Success" Variant="Variant.Filled">
+                    <MudGrid>
+                        @if (!string.IsNullOrEmpty(ProcesoNombre))
+                        {
+                            <MudItem md="12" xs="12">
+                                Registro de @ProcesoNombre
+                            </MudItem>
+                        }
+                        <MudItem md="12" xs="12">
+                            Procesando el registro @CurrentValue de @MaxValue, por favor espere...
+                        </MudItem>
+                        <MudItem md="12" xs="12">
+                            <MudProgressLinear Color="Color.Primary" Buffer="true" Value="@CurrentValue" BufferValue="@(MaxValue-CurrentValue)" Min="1" Max="@MaxValue" />
+                        </MudItem>
+                    </MudGrid>
+                </MudAlert>
+            </MudItem>
+        </MudGrid>
+</MudOverlay>
+
+@code {
+
+    [Parameter]
+    public int MaxValue { get; set; }
+
+    [Parameter]
+    public int CurrentValue { get; set; }
+
+    [Parameter]
+    public string ProcesoNombre { get; set; }
+
+    bool isVisible = false;
+
+    public async Task OnShow(string ProcessName = "", int maxValue = 0)
+    {
+        ProcesoNombre = ProcessName;
+
+        MaxValue = maxValue;
+
+        isVisible = true;
+
+        StateHasChanged();
+    }
+
+    public async Task OnSetCurrentValue(int currentValue)
+    {
+        CurrentValue = currentValue;
+
+        StateHasChanged();
+    }
+
+    public async Task OnSetMaxValue(int maxValue)
+    {
+        MaxValue = maxValue;
+
+        StateHasChanged();
+    }
+
+    public async Task OnHide()
+    {
+        isVisible = false;
+
+        StateHasChanged();
+    }
+}

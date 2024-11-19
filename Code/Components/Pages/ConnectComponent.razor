@@ -1,0 +1,66 @@
+﻿@page "/connect"
+@inject IWebSocketService WebSocketService
+
+<MudTextField @bind-Value="@webSocketUri"
+              Label="Conectar"
+              HelperText="WebSocket URI"
+              AdornmentIcon="@Icons.Material.Filled.LeakAdd"
+              OnAdornmentClick="Connect"
+              AdornmentColor="Color.Primary"
+              Adornment="Adornment.End"
+              Class="px-2" />
+<MudText Typo="Typo.body1" Class="px-2">
+    Connection Status: <MudText Color="@GetConnectionStatusColor()" Inline>@(WebSocketService.IsConnected ? "Connected" : "Disconnected")</MudText>
+</MudText>
+
+@code {
+    private string webSocketUri = "192.168.4.1";
+
+    protected override void OnInitialized()
+    {
+        WebSocketService.OnConnectionStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        WebSocketService.OnConnectionStateChanged -= StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool fir)
+    {
+        if (fir)
+        {
+            webSocketUri = Preferences.Get("IP", webSocketUri);
+
+            StateHasChanged();
+
+        }
+    }
+
+    private async Task Connect()
+    {
+        try
+        {
+            if (WebSocketService.IsConnected)
+            {
+                await WebSocketService.DisconnectAsync();
+            }
+            else
+            {
+                await WebSocketService.ConnectAsync(webSocketUri);
+
+                Preferences.Set("IP", webSocketUri);
+            }           
+        }
+        catch (Exception)
+        {
+            var stop = true;
+        }
+
+    }
+
+    private Color GetConnectionStatusColor()
+    {
+        return WebSocketService.IsConnected ? Color.Success : Color.Error;
+    }
+}

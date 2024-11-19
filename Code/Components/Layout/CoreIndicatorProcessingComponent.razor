@@ -1,0 +1,55 @@
+﻿<MudOverlay Visible="@IsVisible" DarkBackground="true" ZIndex="9999">
+    @if (string.IsNullOrEmpty(Title) == false)
+    {
+        <MudText Typo="Typo.h4" Style="color:var(--amarilloICE)">
+            @Title
+        </MudText>
+    }
+    @if (ShowText)
+    {
+        <MudText Typo="Typo.h5" Style="color:var(--amarilloICE)">
+
+            Procesando, por favor espere...
+
+            <MudProgressCircular Style="height:50px;width:50px;color:var(--azulICE)" Indeterminate="true" />
+        </MudText>
+    }
+    else
+    {
+        <MudProgressCircular Style="color:var(--azulICE)" Indeterminate="true" />
+    }
+
+</MudOverlay>
+
+@code {
+
+
+    [Parameter]
+    public bool IsVisible { get; set; } = false;
+
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public bool ShowText { get; set; }
+
+    public async Task OnShowLoading(string title = "", bool showText = true)
+    {
+        Title = title;
+
+        ShowText = showText;
+
+        IsVisible = true;
+
+        StateHasChanged();
+    }
+
+    public async Task OnHideLoading()
+    {
+        IsVisible = false;
+
+        StateHasChanged();
+
+    }
+
+}

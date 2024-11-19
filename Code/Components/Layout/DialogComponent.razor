@@ -1,0 +1,53 @@
+﻿@using MudBlazor
+
+<MudDialog>
+    <TitleContent>
+        <TitleSecondaryComponent>
+            @MudDialog.Title
+        </TitleSecondaryComponent>
+    </TitleContent>
+    <DialogContent>
+          
+        <MudText>@ContentText</MudText>
+
+    </DialogContent>
+    <DialogActions>
+            <MudButton OnClick="Cancel" Variant="Variant.Filled" Color="Color.Dark">Cancelar</MudButton>
+        <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit">@ButtonText</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string ContentText { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public Color Color { get; set; }
+
+    [Parameter]
+    public RenderFragment Content { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+    ///LLamada al componente
+
+    //@inject IDialogService DialogService
+
+
+    //private void DeleteUser()
+    //{
+    //    var parameters = new DialogParameters();
+    //    parameters.Add("ContentText", "Do you really want to delete these records? This process cannot be undone.");
+    //    parameters.Add("ButtonText", "Delete");
+    //    parameters.Add("Color", Color.Error);
+
+    //    var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+    //    DialogService.Show<DialogTemplateExample_Dialog>("Delete", parameters, options);
+    //}
+
+
+}

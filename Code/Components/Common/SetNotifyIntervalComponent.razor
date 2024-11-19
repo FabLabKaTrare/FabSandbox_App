@@ -1,0 +1,36 @@
+﻿
+<MudTextField Value="DeviceServices.GetNotifyValue()"
+              Label="Notify Interval Value"
+              Variant="Variant.Outlined"
+              Adornment="Adornment.End"
+              AdornmentColor="Color.Warning"
+              AdornmentIcon="@Icons.Material.Filled.Settings"
+              OnAdornmentClick="OnSetValue"
+              ReadOnly/>
+
+@code {
+    #region Parameters
+    [Parameter]
+    public IDeviceServices DeviceServices { get; set; }
+    #endregion
+
+
+    #region Function
+
+    /// <summary>
+    /// Used to initialize a component for the entire lifetime of the component instance
+    /// </summary>
+    protected override void OnInitialized()
+    {
+        DeviceServices.OnStateChanged += StateHasChanged;
+    }
+    /// <summary>
+    /// Send Notify Interval value to the device
+    /// </summary>
+    /// <returns></returns>
+    async Task OnSetValue()
+    {
+        await DeviceServices.SetNotifyIntervalValueShowDialog();
+    }
+    #endregion
+}

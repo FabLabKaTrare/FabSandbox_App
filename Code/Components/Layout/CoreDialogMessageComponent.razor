@@ -1,0 +1,19 @@
+﻿@inject IDialogService _dialogService
+
+@code {
+
+    public async Task<DialogResult> ShowDialogMessage(string title, string contentText, string buttonText, Color buttonColor)
+    {
+        var parameters = new DialogParameters();
+
+        var DialogOptions = new DialogOptions() { MaxWidth = MaxWidth.Medium, CloseButton = true, FullWidth = true, Position = DialogPosition.Center };
+
+        parameters.Add("ContentText", contentText);
+
+        parameters.Add("ButtonText", buttonText);
+
+        parameters.Add("Color", buttonColor);
+
+        return await _dialogService.Show<DialogComponent>(title, parameters, DialogOptions).Result;
+    }
+}

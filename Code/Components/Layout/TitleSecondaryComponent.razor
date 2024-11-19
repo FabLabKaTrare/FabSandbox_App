@@ -1,0 +1,28 @@
+﻿
+<MudSpacer />
+<TitlePrimaryComponent Alignment="@Alignment" Class="@Class" Size="@Size" SizeSm="@SizeSm" Color="@Color" ShowHR="@ShowHR">
+    @ChildContent
+</TitlePrimaryComponent>
+
+@code {
+     [Parameter]
+    public string Class { get; set; } = null;
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public MudBlazor.Typo Size { get; set; } = Typo.h6;
+
+    [Parameter]
+    public MudBlazor.Typo SizeSm { get; set; } = Typo.subtitle2;
+
+    [Parameter]
+    public MudBlazor.Align Alignment { get; set; } = Align.Left;
+
+    [Parameter]
+    public string Color { get; set; } = "white";
+
+    [Parameter]
+    public bool ShowHR { get; set; } = true;
+}

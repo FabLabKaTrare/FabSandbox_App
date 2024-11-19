@@ -1,0 +1,27 @@
+﻿
+
+<MudChart ChartType="ChartType.Line" ChartSeries="@Series" XAxisLabels="@XAxisLabels"  Width="100%" Height="80%" ChartOptions="options"  />
+
+
+@code {
+    [Parameter]
+    public List<DataPoint> Values { get; set; } = new();
+
+    public ChartOptions options = new ChartOptions() { YAxisTicks = 5 };
+    public string[] XAxisLabels = [];
+    public List<ChartSeries> Series = [];
+
+    protected override void OnParametersSet()
+    {
+        UpdateChart();
+    }
+
+    void UpdateChart()
+    {
+        Series = [];
+        Series.Add(new ChartSeries() { Name = "Current Value", Data = Values.Select(v => v.Value).ToArray() });
+        XAxisLabels = Values.Select(v => v.Time.ToString("mm:ss")).ToArray();  
+        StateHasChanged();
+    }
+
+}

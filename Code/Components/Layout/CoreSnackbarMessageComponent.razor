@@ -1,0 +1,17 @@
+﻿@inject ISnackbar _snackbarService
+
+
+@code {
+
+    public void ShowMessage(string messageTitle, string messageText, Severity severity)
+    {
+        _snackbarService.Add(
+            @<div>
+            <h3>@messageTitle</h3>
+            <p>@messageText</p>
+            </div>,
+            severity);
+
+            StateHasChanged();
+    }
+}
